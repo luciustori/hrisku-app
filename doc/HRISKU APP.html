@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRISKU APP - Sistem Manajemen HR</title>
+    <style>
+        :root {
+            --color-primary: #2166b3;
+            --color-primary-hover: #1a52a0;
+            --color-primary-active: #144a8f;
+            --color-success: #27ae60;
+            --color-error: #e74c3c;
+            --color-warning: #f39c12;
+            --color-info: #3498db;
+            --color-bg: #f5f7fa;
+            --color-surface: #ffffff;
+            --color-text: #2c3e50;
+            --color-text-secondary: #7f8c8d;
+            --color-border: #e0e6ed;
+            --space-8: 8px;
+            --space-16: 16px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --radius-base: 8px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #2166b3 0%, #1a52a0 100%);
+            color: white;
+            padding: var(--space-24);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: var(--space-32);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .logo::before {
+            content: '👥';
+            font-size: 24px;
+        }
+
+        .nav-section {
+            margin-bottom: var(--space-24);
+        }
+
+        .nav-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: var(--space-8);
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            padding: var(--space-12) var(--space-16);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            transition: all 200ms ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            margin-bottom: var(--space-8);
+            border: none;
+            background: none;
+            color: white;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.25);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+        }
+
+        .header {
+            background: var(--color-surface);
+            padding: var(--space-24);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-24);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--color-text);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-16);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-badge {
+            background: rgba(33, 102, 179, 0.1);
+            color: var(--color-primary);
+            padding: var(--space-8) var(--space-16);
+            border-radius: var(--radius-base);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 0 var(--space-24) var(--space-24);
+            padding-right: var(--space-24);
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-16);
+            margin-bottom: var(--space-24);
+        }
+
+        .grid-wide {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        /* Cards */
+        .card {
+            background: var(--color-surface);
+            border-radius: var(--radius-base);
+            padding: var(--space-24);
+            box-shadow: var(--shadow-sm);
+            transition: all 200ms ease;
+            border: 1px solid var(--color-border);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: var(--space-16);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: var(--space-16);
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: var(--space-8) var(--space-16);
+            border-radius: var(--radius-base);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 200ms ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-8);
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: rgba(33, 102, 179, 0.1);
+            color: var(--color-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(33, 102, 179, 0.2);
+        }
+
+        .btn-danger {
+            background: var(--color-error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+            border-radius: var(--radius-base);
+            overflow: hidden;
+        }
+
+        .table thead {
+            background: rgba(33, 102, 179, 0.05);
+        }
+
+        .table th {
+            padding: var(--space-16);
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .table td {
+            padding: var(--space-16);
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(33, 102, 179, 0.02);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: var(--space-4) var(--space-8);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--color-success);
+        }
+
+        .badge-warning {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--color-warning);
+        }
+
+        .badge-error {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--color-error);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: var(--space-16);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--space-8);
+            font-weight: 500;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--space-8) var(--space-12);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-size: 14px;
+            color: var(--color-text);
+            background: var(--color-surface);
+            transition: border-color 200ms ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 102, 179, 0.1);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: var(--space-16);
+            margin-bottom: var(--space-24);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .tab-btn {
+            padding: var(--space-12) 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            border-bottom: 3px solid transparent;
+            position: relative;
+            bottom: -2px;
+            transition: all 200ms ease;
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--color-surface);
+            border-radius: var(--radius-base);
+            padding: var(--space-24);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-24);
+            padding-bottom: var(--space-16);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: var(--space-32);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: var(--space-16);
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            background: none;
+            border: none;
+            color: var(--color-primary);
+            cursor: pointer;
+            transition: all 200ms;
+        }
+
+        .action-btn:hover {
+            color: var(--color-primary-hover);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+                margin-left: -280px;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: var(--space-16);
+            }
+
+            .content {
+                padding: 0 var(--space-16) var(--space-16);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">HRISKU APP</div>
+
+            <!-- Dashboard Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Menu Utama</div>
+                <button class="nav-item active" data-page="dashboard">
+                    📊 Dashboard
+                </button>
+            </div>
+
+            <!-- Management Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Manajemen Data</div>
+                <button class="nav-item" data-page="kepegawaian">
+                    👤 Kepegawaian
+                </button>
+                <button class="nav-item" data-page="company">
+                    🏢 Perusahaan
+                </button>
+                <button class="nav-item" data-page="absensi">
+                    📅 Master Absensi
+                </button>
+                <button class="nav-item" data-page="payroll">
+                    💰 Payroll
+                </button>
+            </div>
+
+            <!-- Request Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Permohonan & Laporan</div>
+                <button class="nav-item" data-page="permintaan">
+                    📝 Permohonan
+                </button>
+                <button class="nav-item" data-page="penugasan">
+                    📋 Penugasan/SPPD
+                </button>
+                <button class="nav-item" data-page="berita">
+                    📢 Berita & Pengumuman
+                </button>
+                <button class="nav-item" data-page="fasilitas">
+                    🔧 Fasilitas & Asset
+                </button>
+            </div>
+
+            <!-- Account Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Akun</div>
+                <button class="nav-item" data-page="profil">
+                    ⚙️ Profil & Pengaturan
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main">
+            <!-- Header -->
+            <div class="header">
+                <div>
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-badge" id="user-role">Direktur (Super Admin)</div>
+                    <div class="user-avatar" id="user-avatar">AD</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page-content active">
+                    <div class="grid grid-wide">
+                        <div class="card">
+                            <div class="card-icon">👥</div>
+                            <div class="card-title">Total Karyawan</div>
+                            <div class="card-value" id="total-karyawan">125</div>
+                            <div class="card-subtitle">Aktif di sistem</div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-icon">✅</div>
+                            <div class="card-title">Absen Hari Ini</div>
+                            <div class="card-value" id="absen-hari-ini">98</div>
+                            <div class="card-subtitle">Dari 125 karyawan</div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-icon">📋</div>
+                            <div class="card-title">Ijin/Cuti Hari Ini</div>
+                            <div class="card-value" id="ijin-hari-ini">5</div>
+                            <div class="card-subtitle">Menunggu persetujuan: 2</div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-icon">📣</div>
+                            <div class="card-title">Pengumuman Baru</div>
+                            <div class="card-value" id="pengumuman-baru">3</div>
+                            <div class="card-subtitle">Belum dibaca</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📅 Kalender Bulan Ini</div>
+                        <div class="card">
+                            <div id="calendar-view" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Min</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Sen</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Sel</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Rab</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Kam</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Jum</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Sab</div>
+                            </div>
+                            <div id="calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 8px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📊 Statistik Karyawan per Divisi</div>
+                        <div class="card">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Divisi</th>
+                                        <th>Jumlah Karyawan</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>IT & Teknologi</td>
+                                        <td><strong>28</strong></td>
+                                        <td><span class="badge badge-success">Aktif</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Marketing</td>
+                                        <td><strong>22</strong></td>
+                                        <td><span class="badge badge-success">Aktif</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sumber Daya Manusia</td>
+                                        <td><strong>15</strong></td>
+                                        <td><span class="badge badge-success">Aktif</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Operasional</td>
+                                        <td><strong>35</strong></td>
+                                        <td><span class="badge badge-success">Aktif</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Keuangan</td>
+                                        <td><strong>25</strong></td>
+                                        <td><span class="badge badge-success">Aktif</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📢 Pengumuman Terbaru</div>
+                        <div class="card">
+                            <div style="padding: var(--space-16); border-bottom: 1px solid var(--color-border);">
+                                <div style="font-weight: 600; margin-bottom: 4px;">🎉 Cuti Bersama 2025</div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px;">Sesuai dengan SKB 3 Menteri Perdayagunaan Aparatur Negara</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">2 jam yang lalu</div>
+                            </div>
+                            <div style="padding: var(--space-16); border-bottom: 1px solid var(--color-border);">
+                                <div style="font-weight: 600; margin-bottom: 4px;">📋 Perubahan Jam Kerja</div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px;">Efektif mulai 1 Januari 2025, jam kerja diterapkan sistem shift</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">5 jam yang lalu</div>
+                            </div>
+                            <div style="padding: var(--space-16);">
+                                <div style="font-weight: 600; margin-bottom: 4px;">🎊 Perayaan Tahun Baru Perusahaan</div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px;">Undian menarik dan gathering di Grand Ballroom</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">1 hari yang lalu</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kepegawaian Page -->
+                <div id="kepegawaian" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Manajemen Data Karyawan</h2>
+                        <button class="btn btn-primary" onclick="openModal('addEmployeeModal')">➕ Tambah Karyawan</button>
+                    </div>
+
+                    <div class="card">
+                        <div style="margin-bottom: var(--space-16);">
+                            <input type="text" class="form-input" placeholder="Cari nama atau NIK karyawan...">
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>NIK</th>
+                                    <th>Nama</th>
+                                    <th>Jabatan</th>
+                                    <th>Divisi</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#001</td>
+                                    <td>Budi Santoso</td>
+                                    <td>Manager IT</td>
+                                    <td>IT & Teknologi</td>
+                                    <td><span class="badge badge-success">Aktif</span></td>
+                                    <td>
+                                        <button class="action-btn">👁️ Lihat</button>
+                                        <button class="action-btn">✏️ Edit</button>
+                                        <button class="action-btn">🗑️ Hapus</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#002</td>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>Developer Senior</td>
+                                    <td>IT & Teknologi</td>
+                                    <td><span class="badge badge-success">Aktif</span></td>
+                                    <td>
+                                        <button class="action-btn">👁️ Lihat</button>
+                                        <button class="action-btn">✏️ Edit</button>
+                                        <button class="action-btn">🗑️ Hapus</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#003</td>
+                                    <td>Ahmad Wijaya</td>
+                                    <td>Marketing Manager</td>
+                                    <td>Marketing</td>
+                                    <td><span class="badge badge-success">Aktif</span></td>
+                                    <td>
+                                        <button class="action-btn">👁️ Lihat</button>
+                                        <button class="action-btn">✏️ Edit</button>
+                                        <button class="action-btn">🗑️ Hapus</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Company Page -->
+                <div id="company" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Struktur Organisasi</h2>
+                        <button class="btn btn-primary" onclick="openModal('addCompanyModal')">➕ Edit Struktur</button>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab(event, 'company-info')">Informasi Perusahaan</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'company-structure')">Struktur Organisasi</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'company-branch')">Cabang & Lokasi</button>
+                    </div>
+
+                    <div id="company-info" class="tab-content active">
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-24);">
+                                <div style="font-weight: 600; margin-bottom: 8px;">Nama Perusahaan</div>
+                                <div style="color: var(--color-text-secondary);">PT. Global Teknologi Indonesia</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-24);">
+                                <div style="font-weight: 600; margin-bottom: 8px;">Alamat Kantor Pusat</div>
+                                <div style="color: var(--color-text-secondary);">Jl. Ahmad Yani No. 123, Jakarta Selatan 12345</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-24);">
+                                <div style="font-weight: 600; margin-bottom: 8px;">Nomor Telepon</div>
+                                <div style="color: var(--color-text-secondary);">+62 21 9876-5432</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-24);">
+                                <div style="font-weight: 600; margin-bottom: 8px;">NPWP</div>
+                                <div style="color: var(--color-text-secondary);">12.345.678.9-123.000</div>
+                            </div>
+                            <button class="btn btn-primary">Ubah Data Perusahaan</button>
+                        </div>
+                    </div>
+
+                    <div id="company-structure" class="tab-content">
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-16); padding: var(--space-16); background: rgba(33, 102, 179, 0.05); border-radius: var(--radius-base);">
+                                <strong>Level 1 - Direktur</strong> (Direktur Utama)
+                            </div>
+                            <div style="margin-left: var(--space-32); margin-bottom: var(--space-16); padding: var(--space-16); background: rgba(39, 174, 96, 0.05); border-radius: var(--radius-base);">
+                                <strong>Level 2 - Manager</strong> (7 Manager)
+                            </div>
+                            <div style="margin-left: var(--space-32); margin-bottom: var(--space-16); padding: var(--space-16); background: rgba(243, 156, 18, 0.05); border-radius: var(--radius-base);">
+                                <strong>Level 3 - Supervisor</strong> (15 Supervisor)
+                            </div>
+                            <div style="margin-left: var(--space-32); margin-bottom: var(--space-16); padding: var(--space-16); background: rgba(52, 152, 219, 0.05); border-radius: var(--radius-base);">
+                                <strong>Level 4 - Koordinator</strong> (28 Koordinator)
+                            </div>
+                            <div style="margin-left: var(--space-32); padding: var(--space-16); background: rgba(155, 89, 182, 0.05); border-radius: var(--radius-base);">
+                                <strong>Level 5 - Staff</strong> (75 Staff)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="company-branch" class="tab-content">
+                        <div class="grid">
+                            <div class="card">
+                                <div style="margin-bottom: var(--space-16);">
+                                    <strong>Kantor Pusat Jakarta</strong>
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px;">
+                                    Jl. Ahmad Yani No. 123, Jakarta Selatan<br>
+                                    Lat: -6.2750, Long: 106.7964
+                                </div>
+                                <button class="btn btn-secondary" style="margin-top: var(--space-8);">Edit Lokasi</button>
+                            </div>
+
+                            <div class="card">
+                                <div style="margin-bottom: var(--space-16);">
+                                    <strong>Cabang Surabaya</strong>
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px;">
+                                    Jl. Ngagel No. 45, Surabaya<br>
+                                    Lat: -7.2575, Long: 112.7521
+                                </div>
+                                <button class="btn btn-secondary" style="margin-top: var(--space-8);">Edit Lokasi</button>
+                            </div>
+
+                            <div class="card">
+                                <div style="margin-bottom: var(--space-16);">
+                                    <strong>Cabang Bandung</strong>
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px;">
+                                    Jl. Merdeka No. 78, Bandung<br>
+                                    Lat: -6.9147, Long: 107.6098
+                                </div>
+                                <button class="btn btn-secondary" style="margin-top: var(--space-8);">Edit Lokasi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Master Absensi Page -->
+                <div id="absensi" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Master Absensi & Jadwal</h2>
+                        <button class="btn btn-primary" onclick="openModal('addShiftModal')">➕ Tambah Shift</button>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab(event, 'shift-settings')">Pengaturan Shift</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'holiday-settings')">Hari Libur & Cuti</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'schedule-calendar')">Kalender Jadwal</button>
+                    </div>
+
+                    <div id="shift-settings" class="tab-content active">
+                        <div class="grid">
+                            <div class="card">
+                                <div style="margin-bottom: 12px;">
+                                    <strong>Shift Reguler</strong>
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                                    Senin - Jumat: 08:00 - 17:00
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                                    Karyawan aktif: 65
+                                </div>
+                                <button class="btn btn-secondary" style="font-size: 12px;">Edit Shift</button>
+                            </div>
+
+                            <div class="card">
+                                <div style="margin-bottom: 12px;">
+                                    <strong>Shift 1</strong>
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                                    Senin - Minggu: 06:00 - 14:00
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                                    Karyawan aktif: 32
+                                </div>
+                                <button class="btn btn-secondary" style="font-size: 12px;">Edit Shift</button>
+                            </div>
+
+                            <div class="card">
+                                <div style="margin-bottom: 12px;">
+                                    <strong>Shift 2</strong>
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                                    Senin - Minggu: 14:00 - 22:00
+                                </div>
+                                <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">
+                                    Karyawan aktif: 28
+                                </div>
+                                <button class="btn btn-secondary" style="font-size: 12px;">Edit Shift</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="holiday-settings" class="tab-content">
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-24);">
+                                <div style="font-weight: 600; margin-bottom: 12px;">📅 Cuti Bersama & Hari Libur Nasional</div>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Keterangan</th>
+                                            <th>Tipe</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>01 Januari 2025</td>
+                                            <td>Tahun Baru</td>
+                                            <td><span class="badge badge-success">Hari Libur</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>10 Februari 2025</td>
+                                            <td>Tahun Baru Imlek</td>
+                                            <td><span class="badge badge-success">Hari Libur</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>14-19 Maret 2025</td>
+                                            <td>Cuti Bersama (SKB 3 Menteri)</td>
+                                            <td><span class="badge badge-warning">Cuti Bersama</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>01 Mei 2025</td>
+                                            <td>Hari Buruh</td>
+                                            <td><span class="badge badge-success">Hari Libur</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button class="btn btn-primary">Tambah Hari Libur</button>
+                        </div>
+                    </div>
+
+                    <div id="schedule-calendar" class="tab-content">
+                        <div class="card">
+                            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-16);">Drag and drop untuk mengatur jadwal karyawan pada kalender bulanan</p>
+                            <div id="schedule-calendar-view" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Min</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Sen</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Sel</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Rab</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Kam</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Jum</div>
+                                <div style="text-align: center; font-weight: 600; padding: 8px; color: var(--color-text-secondary); font-size: 12px;">Sab</div>
+                            </div>
+                            <div id="schedule-calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payroll Page -->
+                <div id="payroll" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Manajemen Payroll</h2>
+                        <button class="btn btn-primary" onclick="openModal('payrollModal')">📊 Generate Payroll</button>
+                    </div>
+
+                    <div class="card">
+                        <div style="margin-bottom: var(--space-16); display: flex; gap: var(--space-16);">
+                            <select class="form-input" style="flex: 1; max-width: 200px;">
+                                <option>Desember 2024</option>
+                                <option>November 2024</option>
+                                <option>Oktober 2024</option>
+                            </select>
+                            <button class="btn btn-secondary">Filter</button>
+                        </div>
+
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nama Karyawan</th>
+                                    <th>Hadir</th>
+                                    <th>Ijin/Cuti</th>
+                                    <th>Lembur</th>
+                                    <th>Gaji Pokok</th>
+                                    <th>Tunjangan</th>
+                                    <th>Total Gaji</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Budi Santoso</td>
+                                    <td>22</td>
+                                    <td>1</td>
+                                    <td>6</td>
+                                    <td>Rp 5.000.000</td>
+                                    <td>Rp 1.500.000</td>
+                                    <td><strong>Rp 6.500.000</strong></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>23</td>
+                                    <td>0</td>
+                                    <td>4</td>
+                                    <td>Rp 6.000.000</td>
+                                    <td>Rp 1.800.000</td>
+                                    <td><strong>Rp 7.800.000</strong></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Ahmad Wijaya</td>
+                                    <td>21</td>
+                                    <td>2</td>
+                                    <td>8</td>
+                                    <td>Rp 4.500.000</td>
+                                    <td>Rp 1.350.000</td>
+                                    <td><strong>Rp 5.850.000</strong></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Permohonan Page -->
+                <div id="permintaan" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Permohonan & Pengajuan</h2>
+                        <button class="btn btn-primary" onclick="openModal('permintaanModal')">➕ Buat Permohonan</button>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab(event, 'izin-cuti')">Ijin/Cuti/Sakit</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'lembur')">Lembur</button>
+                    </div>
+
+                    <div id="izin-cuti" class="tab-content active">
+                        <div class="card">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Pemohon</th>
+                                        <th>Tipe</th>
+                                        <th>Tanggal</th>
+                                        <th>Durasi</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Siti Nurhaliza</td>
+                                        <td>Cuti</td>
+                                        <td>5 - 10 Januari 2025</td>
+                                        <td>5 hari kerja</td>
+                                        <td><span class="badge badge-warning">Menunggu</span></td>
+                                        <td>
+                                            <button class="action-btn">✅ Approve</button>
+                                            <button class="action-btn">❌ Reject</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ahmad Wijaya</td>
+                                        <td>Ijin</td>
+                                        <td>3 Januari 2025</td>
+                                        <td>1 hari kerja</td>
+                                        <td><span class="badge badge-success">Disetujui</span></td>
+                                        <td>
+                                            <button class="action-btn">👁️ Detail</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Budi Santoso</td>
+                                        <td>Sakit</td>
+                                        <td>2 Januari 2025</td>
+                                        <td>1 hari kerja</td>
+                                        <td><span class="badge badge-error">Ditolak</span></td>
+                                        <td>
+                                            <button class="action-btn">👁️ Detail</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="lembur" class="tab-content">
+                        <div class="card">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Pemohon</th>
+                                        <th>Tanggal Lembur</th>
+                                        <th>Jam Lembur</th>
+                                        <th>Alasan</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Siti Nurhaliza</td>
+                                        <td>5 Januari 2025</td>
+                                        <td>3 jam</td>
+                                        <td>Menyelesaikan project deadline</td>
+                                        <td><span class="badge badge-success">Disetujui</span></td>
+                                        <td>
+                                            <button class="action-btn">👁️ Detail</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ahmad Wijaya</td>
+                                        <td>6 Januari 2025</td>
+                                        <td>2 jam</td>
+                                        <td>Deploy aplikasi baru</td>
+                                        <td><span class="badge badge-warning">Menunggu</span></td>
+                                        <td>
+                                            <button class="action-btn">✅ Approve</button>
+                                            <button class="action-btn">❌ Reject</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Penugasan Page -->
+                <div id="penugasan" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Penugasan / SPPD</h2>
+                        <button class="btn btn-primary" onclick="openModal('penugasanModal')">➕ Buat Penugasan</button>
+                    </div>
+
+                    <div class="card">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Karyawan</th>
+                                    <th>Event / Kegiatan</th>
+                                    <th>Tanggal</th>
+                                    <th>Lokasi</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Budi Santoso</td>
+                                    <td>Konferensi IT Asia Pacific</td>
+                                    <td>10 - 12 Januari 2025</td>
+                                    <td>Bangkok, Thailand</td>
+                                    <td><span class="badge badge-success">Approved</span></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>Workshop Digital Marketing</td>
+                                    <td>15 Januari 2025</td>
+                                    <td>Jakarta</td>
+                                    <td><span class="badge badge-success">Approved</span></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Berita Page -->
+                <div id="berita" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Berita & Pengumuman</h2>
+                        <button class="btn btn-primary" onclick="openModal('beritaModal')">➕ Posting Berita</button>
+                    </div>
+
+                    <div class="grid grid-wide">
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-16);">
+                                <strong>🎉 Perayaan Tahun Baru Perusahaan</strong>
+                            </div>
+                            <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: var(--space-16);">
+                                Kami dengan bangga mengumumkan acara perayaan tahun baru bersama seluruh karyawan. Acara ini akan diadakan di Grand Ballroom dengan berbagai hadiah menarik dan doorprize.
+                            </div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">
+                                Diposting oleh: Admin HR | 2 hari yang lalu
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-16);">
+                                <strong>📋 Perubahan Sistem Absensi</strong>
+                            </div>
+                            <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: var(--space-16);">
+                                Mulai tanggal 1 Januari 2025, sistem absensi akan berubah menggunakan face recognition dan geolocation untuk meningkatkan keamanan dan akurasi.
+                            </div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">
+                                Diposting oleh: Admin IT | 5 hari yang lalu
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-16);">
+                                <strong>🎊 Program Penghargaan Karyawan Terbaik</strong>
+                            </div>
+                            <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: var(--space-16);">
+                                Kami membuka program penghargaan untuk karyawan terbaik dengan kriteria kinerja, inovasi, dan kontribusi terhadap perusahaan.
+                            </div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">
+                                Diposting oleh: Direktur | 1 minggu yang lalu
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fasilitas Page -->
+                <div id="fasilitas" class="page-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-24);">
+                        <h2 style="font-size: 20px; color: var(--color-text);">Fasilitas & Asset</h2>
+                        <button class="btn btn-primary" onclick="openModal('fasilitasModal')">➕ Ajukan Peminjaman</button>
+                    </div>
+
+                    <div class="card">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Pemohon</th>
+                                    <th>Fasilitas</th>
+                                    <th>Tanggal Peminjaman</th>
+                                    <th>Durasi</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Ahmad Wijaya</td>
+                                    <td>Proyektor + Layar</td>
+                                    <td>5 Januari 2025</td>
+                                    <td>4 jam</td>
+                                    <td><span class="badge badge-success">Disetujui</span></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Siti Nurhaliza</td>
+                                    <td>Meeting Room A</td>
+                                    <td>6 - 7 Januari 2025</td>
+                                    <td>2 hari</td>
+                                    <td><span class="badge badge-warning">Menunggu</span></td>
+                                    <td>
+                                        <button class="action-btn">✅ Approve</button>
+                                        <button class="action-btn">❌ Reject</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Budi Santoso</td>
+                                    <td>Laptop Mobile</td>
+                                    <td>8 Januari 2025</td>
+                                    <td>1 hari</td>
+                                    <td><span class="badge badge-success">Disetujui</span></td>
+                                    <td><button class="action-btn">👁️ Detail</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Profil Page -->
+                <div id="profil" class="page-content">
+                    <h2 style="font-size: 20px; color: var(--color-text); margin-bottom: var(--space-24);">Profil & Pengaturan Akun</h2>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab(event, 'profile-info')">Informasi Profil</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'login-cred')">Login & Keamanan</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'notifikasi')">Notifikasi & Preferensi</button>
+                    </div>
+
+                    <div id="profile-info" class="tab-content active">
+                        <div class="card">
+                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--space-32); align-items: start;">
+                                <div style="text-align: center;">
+                                    <div style="width: 120px; height: 120px; background: var(--color-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px; margin: 0 auto var(--space-16);">
+                                        👤
+                                    </div>
+                                    <button class="btn btn-secondary" style="font-size: 12px;">Ganti Foto</button>
+                                </div>
+
+                                <div>
+                                    <div style="margin-bottom: var(--space-24);">
+                                        <label class="form-label">Nama Lengkap</label>
+                                        <input type="text" class="form-input" value="Budi Santoso" />
+                                    </div>
+                                    <div style="margin-bottom: var(--space-24);">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-input" value="budi.santoso@company.com" />
+                                    </div>
+                                    <div style="margin-bottom: var(--space-24);">
+                                        <label class="form-label">Nomor Identitas (KTP)</label>
+                                        <input type="text" class="form-input" value="3201123456789012" />
+                                    </div>
+                                    <div style="margin-bottom: var(--space-24);">
+                                        <label class="form-label">Tanggal Lahir</label>
+                                        <input type="date" class="form-input" value="1985-06-15" />
+                                    </div>
+                                    <div style="margin-bottom: var(--space-24);">
+                                        <label class="form-label">Nomor Telepon</label>
+                                        <input type="tel" class="form-input" value="+62 812 3456 7890" />
+                                    </div>
+                                    <button class="btn btn-primary">Simpan Perubahan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="login-cred" class="tab-content">
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-24);">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" value="budi.santoso" />
+                            </div>
+                            <div style="margin-bottom: var(--space-24);">
+                                <label class="form-label">Password Saat Ini</label>
+                                <input type="password" class="form-input" placeholder="Masukkan password lama" />
+                            </div>
+                            <div style="margin-bottom: var(--space-24);">
+                                <label class="form-label">Password Baru</label>
+                                <input type="password" class="form-input" placeholder="Masukkan password baru" />
+                            </div>
+                            <div style="margin-bottom: var(--space-24);">
+                                <label class="form-label">Konfirmasi Password</label>
+                                <input type="password" class="form-input" placeholder="Konfirmasi password baru" />
+                            </div>
+                            <button class="btn btn-primary">Ubah Password</button>
+
+                            <div style="margin-top: var(--space-32); padding-top: var(--space-24); border-top: 1px solid var(--color-border);">
+                                <h3 style="margin-bottom: var(--space-16); color: var(--color-text);">Face Recognition Verification</h3>
+                                <p style="color: var(--color-text-secondary); margin-bottom: var(--space-16);">Aktifkan face recognition untuk verifikasi absensi yang lebih aman</p>
+                                <button class="btn btn-primary">🎥 Setup Face Recognition</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="notifikasi" class="tab-content">
+                        <div class="card">
+                            <div style="margin-bottom: var(--space-16); padding-bottom: var(--space-16); border-bottom: 1px solid var(--color-border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>📧 Email Notifications</strong>
+                                        <div style="font-size: 13px; color: var(--color-text-secondary);">Terima notifikasi penting via email</div>
+                                    </div>
+                                    <input type="checkbox" checked style="width: 20px; height: 20px; cursor: pointer;" />
+                                </div>
+                            </div>
+                            <div style="margin-bottom: var(--space-16); padding-bottom: var(--space-16); border-bottom: 1px solid var(--color-border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>🔔 Push Notifications</strong>
+                                        <div style="font-size: 13px; color: var(--color-text-secondary);">Terima notifikasi push di aplikasi</div>
+                                    </div>
+                                    <input type="checkbox" checked style="width: 20px; height: 20px; cursor: pointer;" />
+                                </div>
+                            </div>
+                            <div style="margin-bottom: var(--space-16); padding-bottom: var(--space-16); border-bottom: 1px solid var(--color-border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>📢 Announcements</strong>
+                                        <div style="font-size: 13px; color: var(--color-text-secondary);">Notifikasi pengumuman dan berita perusahaan</div>
+                                    </div>
+                                    <input type="checkbox" checked style="width: 20px; height: 20px; cursor: pointer;" />
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>💬 Geolocation & Attendance</strong>
+                                    <div style="font-size: 13px; color: var(--color-text-secondary);">Bagikan lokasi untuk keperluan absensi</div>
+                                </div>
+                                <input type="checkbox" checked style="width: 20px; height: 20px; cursor: pointer;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="addEmployeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin: 0; font-size: 18px;">Tambah Karyawan Baru</h3>
+                <button class="modal-close" onclick="closeModal('addEmployeeModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" class="form-input" placeholder="Masukkan nama lengkap">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nomor Identitas (KTP)</label>
+                <input type="text" class="form-input" placeholder="Masukkan nomor KTP">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tanggal Lahir</label>
+                <input type="date" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Divisi</label>
+                <select class="form-input">
+                    <option>-- Pilih Divisi --</option>
+                    <option>IT & Teknologi</option>
+                    <option>Marketing</option>
+                    <option>Operasional</option>
+                    <option>Keuangan</option>
+                    <option>HR</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jabatan</label>
+                <input type="text" class="form-input" placeholder="Masukkan jabatan">
+            </div>
+            <div style="display: flex; gap: var(--space-16);">
+                <button class="btn btn-primary" style="flex: 1;" onclick="closeModal('addEmployeeModal')">Simpan</button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="closeModal('addEmployeeModal')">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Page Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.getAttribute('data-page');
+                switchPage(page);
+                
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function switchPage(page) {
+            document.querySelectorAll('.page-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const pageElement = document.getElementById(page);
+            if (pageElement) {
+                pageElement.classList.add('active');
+            }
+
+            const titles = {
+                'dashboard': 'Dashboard',
+                'kepegawaian': 'Manajemen Data Karyawan',
+                'company': 'Struktur Organisasi',
+                'absensi': 'Master Absensi & Jadwal',
+                'payroll': 'Manajemen Payroll',
+                'permintaan': 'Permohonan & Pengajuan',
+                'penugasan': 'Penugasan / SPPD',
+                'berita': 'Berita & Pengumuman',
+                'fasilitas': 'Fasilitas & Asset',
+                'profil': 'Profil & Pengaturan Akun'
+            };
+
+            document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
+        }
+
+        // Tab Switching
+        function switchTab(event, tabId) {
+            event.preventDefault();
+            
+            const parent = event.target.closest('.tabs').parentElement;
+            parent.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            parent.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            const tabContent = parent.querySelector('#' + tabId);
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Calendar Generation
+        function generateCalendar() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+
+            const calendarDays = document.getElementById('calendar-days');
+            calendarDays.innerHTML = '';
+
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                calendarDays.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.style.cssText = 'padding: 12px; text-align: center; border: 1px solid var(--color-border); border-radius: var(--radius-base); cursor: pointer; transition: all 200ms; background: white;';
+                dayElement.textContent = day;
+                
+                dayElement.addEventListener('mouseover', () => {
+                    dayElement.style.background = 'rgba(33, 102, 179, 0.1)';
+                });
+                
+                dayElement.addEventListener('mouseout', () => {
+                    dayElement.style.background = 'white';
+                });
+                
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        // Initialize
+        generateCalendar();
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Search functionality
+        document.querySelector('input[placeholder="Cari nama atau NIK karyawan..."]').addEventListener('input', function(e) {
+            console.log('Pencarian:', e.target.value);
+        });
+    </script>
+</body>
+</html>

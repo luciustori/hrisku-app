@@ -1,0 +1,16 @@
+# Uploads
+/uploads/employees/*
+!/uploads/employees/.gitkeep
+
+# Config (jika ada sensitive data)
+/config/database.php
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
