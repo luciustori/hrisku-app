@@ -23,6 +23,26 @@
                 Perusahaan
             </a>
         </li>
+        <li class="dropdown">
+            <a href="#" class="dropbtn">
+                Absensi ▼
+            </a>
+            <div class="dropdown-content">
+                <a href="<?php echo BASE_URL; ?>modules/absensi/index.php">Master Absensi</a>
+                <a href="<?php echo BASE_URL; ?>modules/absensi/calendar.php">Kalender Jadwal</a>
+                <a href="<?php echo BASE_URL; ?>modules/absensi/shifts.php">Master Shift</a>
+                <a href="<?php echo BASE_URL; ?>modules/absensi/holidays.php">Hari Libur</a>
+                <a href="<?php echo BASE_URL; ?>modules/absensi/report.php">Laporan Absensi</a>
+            </div>
+        </li>
+        <?php endif; ?>
+        
+        <?php if (getUserRole() == 'user'): ?>
+        <li>
+            <a href="<?php echo BASE_URL; ?>modules/absensi/checkin.php">
+                Absensi Saya
+            </a>
+        </li>
         <?php endif; ?>
     </ul>
     
