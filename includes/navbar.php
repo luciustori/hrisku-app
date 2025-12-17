@@ -102,6 +102,45 @@ $current_module = basename(dirname($_SERVER['PHP_SELF']));
                 </div>
             </div>
 
+            <!-- Payroll -->
+            <div class="nav-dropdown">
+                <button class="nav-link <?php echo $current_module == 'payroll' ? 'active' : ''; ?>">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    Payroll
+                    <svg class="dropdown-arrow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="<?php echo BASE_URL; ?>modules/payroll/index.php" class="dropdown-item">
+                        <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>modules/payroll/components.php" class="dropdown-item">
+                        <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Komponen Gaji</span>
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>modules/payroll/master_salary.php" class="dropdown-item">
+                        <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        </svg>
+                        <span>Master Gaji</span>
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>modules/payroll/generate.php" class="dropdown-item">
+                        <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        <span>Generate Payroll</span>
+                    </a>
+                </div>
+            </div>            
             <!-- Cuti Menu -->
             <div class="nav-dropdown">
                 <button class="nav-link <?php echo $current_module == 'cuti' ? 'active' : ''; ?>">
@@ -168,6 +207,8 @@ $current_module = basename(dirname($_SERVER['PHP_SELF']));
                 </div>
             </div>
         </div>
+
+
 
         <!-- User Profile -->
         <div class="nav-user">
@@ -244,6 +285,14 @@ $current_module = basename(dirname($_SERVER['PHP_SELF']));
             <a href="<?php echo BASE_URL; ?>modules/lembur/pengajuan.php" class="mobile-sublink">Ajukan Lembur</a>
             <a href="<?php echo BASE_URL; ?>modules/cuti/my_cuti.php" class="mobile-sublink">Cuti Saya</a>
             <a href="<?php echo BASE_URL; ?>modules/lembur/my_lembur.php" class="mobile-sublink">Lembur Saya</a>
+        </div>
+
+        <div class="mobile-group">
+            <div class="mobile-group-title">Penggajian (Payroll)</div>
+            <a href="<?php echo BASE_URL; ?>modules/payroll/index.php" class="mobile-sublink">Dashboard</a>
+            <a href="<?php echo BASE_URL; ?>modules/payroll/components.php" class="mobile-sublink">Komponen Gaji</a>
+            <a href="<?php echo BASE_URL; ?>modules/payraoll/master_salary.php" class="mobile-sublink">Master Gaji</a>
+            <a href="<?php echo BASE_URL; ?>modules/payroll/generate.php" class="mobile-sublink">Generate payrol</a>
         </div>
         
         <div class="mobile-divider"></div>
