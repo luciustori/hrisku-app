@@ -255,16 +255,30 @@ include '../../includes/navbar.php';
     <?php endif; ?>
 </div>
 
+</div>
+
 <!-- Hidden data for JavaScript -->
 <div id="scheduleData" 
      data-schedule-id="<?php echo $schedule['id'] ?? ''; ?>"
      data-branch-lat="<?php echo $schedule['branch_lat'] ?? ''; ?>"
      data-branch-lng="<?php echo $schedule['branch_lng'] ?? ''; ?>"
      data-radius="<?php echo $schedule['radius_meter'] ?? ''; ?>"
+     data-branch-name="<?php echo htmlspecialchars($schedule['branch_name'] ?? ''); ?>"
      style="display: none;">
 </div>
 
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
+let map;
+let branchMarker;
+let userMarker;
+let circle;
+
 // Update current time
 function updateTime() {
     const now = new Date();
@@ -285,6 +299,118 @@ function updateTime() {
 
 updateTime();
 setInterval(updateTime, 1000);
+
+// Initialize Leaflet Map
+<?php if ($schedule): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduleData = document.getElementById('scheduleData');
+    const branchLat = parseFloat(scheduleData.dataset.branchLat);
+    const branchLng = parseFloat(scheduleData.dataset.branchLng);
+    const radius = parseInt(scheduleData.dataset.radius);
+    const branchName = scheduleData.dataset.branchName;
+    
+    // Initialize map centered on branch
+    map = L.map('map').setView([branchLat, branchLng], 17);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Add branch marker (blue)
+    const branchIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    
+    branchMarker = L.marker([branchLat, branchLng], {icon: branchIcon})
+        .addTo(map)
+        .bindPopup(`
+            <div style="text-align: center;">
+                <strong>🏢 ${branchName}</strong><br>
+                <small>Radius: ${radius} meter</small>
+            </div>
+        `);
+    
+    // Add radius circle
+    circle = L.circle([branchLat, branchLng], {
+        color: '#667eea',
+        fillColor: '#667eea',
+        fillOpacity: 0.2,
+        radius: radius
+    }).addTo(map);
+    
+    // Get user location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                
+                // Add user marker (red)
+                const userIcon = L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+                
+                userMarker = L.marker([userLat, userLng], {icon: userIcon})
+                    .addTo(map);
+                
+                // Calculate distance (Haversine)
+                const R = 6371000; // Earth radius in meters
+                const dLat = (userLat - branchLat) * Math.PI / 180;
+                const dLng = (userLng - branchLng) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                          Math.cos(branchLat * Math.PI / 180) * Math.cos(userLat * Math.PI / 180) *
+                          Math.sin(dLng/2) * Math.sin(dLng/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const distance = R * c;
+                
+                const distanceText = distance > 1000 
+                    ? (distance / 1000).toFixed(2) + ' km'
+                    : Math.round(distance) + ' meter';
+                
+                const isInRadius = distance <= radius;
+                const statusText = isInRadius 
+                    ? '<span style="color: #10b981;">✓ Dalam Radius</span>'
+                    : '<span style="color: #ef4444;">✗ Di Luar Radius</span>';
+                
+                userMarker.bindPopup(`
+                    <div style="text-align: center;">
+                        <strong>📍 Lokasi Anda</strong><br>
+                        Jarak: ${distanceText}<br>
+                        ${statusText}
+                    </div>
+                `).openPopup();
+                
+                // Fit map to show both markers
+                const bounds = L.latLngBounds([
+                    [branchLat, branchLng],
+                    [userLat, userLng]
+                ]);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            },
+            function(error) {
+                console.error('Geolocation error:', error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+});
+<?php endif; ?>
 
 // Check In function
 function checkIn() {

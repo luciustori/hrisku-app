@@ -2,133 +2,93 @@
 require_once '../../config/config.php';
 require_once '../../config/database.php';
 
-checkRole(['super_admin', 'admin']);
+checkRole(['super_admin', 'admin', 'user']);
 
 $page_title = 'Master Absensi';
 
 $database = new Database();
 $db = $database->getConnection();
 
-// Get shifts
-$shifts = $db->query("SELECT * FROM shifts ORDER BY is_mod, shift_code")->fetchAll(PDO::FETCH_ASSOC);
+// Get statistics
+$statsQuery = "
+    SELECT 
+        COUNT(DISTINCT es.employee_id) as scheduled_today,
+        COUNT(DISTINCT ar.employee_id) as present_today,
+        (SELECT COUNT(*) FROM holidays WHERE holiday_date = CURDATE()) as is_holiday
+    FROM employee_schedules es
+    LEFT JOIN attendance_records ar ON es.employee_id = ar.employee_id AND ar.attendance_date = CURDATE()
+    WHERE es.schedule_date = CURDATE()
+";
+$stmt = $db->query($statsQuery);
+$stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Get holidays count
-$holiday_count = $db->query("SELECT COUNT(*) as total FROM holidays WHERE YEAR(holiday_date) = YEAR(CURDATE())")->fetch(PDO::FETCH_ASSOC)['total'];
-
-include '../../includes/header.php';
-include '../../includes/navbar.php';
+include '../includes/header.php';
+include '../includes/navbar.php';
 ?>
+
+<link rel="stylesheet" href="../assets/css/absensi.css">
 
 <div class="container">
     <div class="page-header">
-        <h1>Master Absensi</h1>
+        <h1>📋 Master Absensi</h1>
+        <p>Kelola jadwal shift, absensi, dan hari libur karyawan</p>
     </div>
-    
-    <div class="stats-grid">
+
+    <div class="stats-container">
         <div class="stat-card">
-            <h3>Total Shift</h3>
-            <div class="stat-number"><?php echo count($shifts); ?></div>
-            <div class="stat-label">Shift Terdaftar</div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Libur Tahun Ini</h3>
-            <div class="stat-number"><?php echo $holiday_count; ?></div>
-            <div class="stat-label">Hari Libur</div>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Jadwal Hari Ini</h3>
-            <div class="stat-number">
-                <?php 
-                $today_schedule = $db->query("SELECT COUNT(*) as total FROM employee_schedules WHERE schedule_date = CURDATE()")->fetch(PDO::FETCH_ASSOC)['total'];
-                echo $today_schedule;
-                ?>
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <h3><?= $stats['scheduled_today'] ?? 0 ?></h3>
+                <p>Jadwal Hari Ini</p>
             </div>
-            <div class="stat-label">Karyawan Dijadwalkan</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3><?= $stats['present_today'] ?? 0 ?></h3>
+                <p>Sudah Absen</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏖️</div>
+            <div class="stat-info">
+                <h3><?= $stats['is_holiday'] ? 'Ya' : 'Tidak' ?></h3>
+                <p>Hari Libur</p>
+            </div>
         </div>
     </div>
-    
-    <!-- Quick Links -->
-    <div class="quick-links">
-        <a href="calendar.php" class="quick-link-card">
-            <div class="quick-link-icon">📅</div>
+
+    <div class="menu-grid">
+        <a href="calendar.php" class="menu-card">
+            <div class="icon">📅</div>
             <h3>Kalender Jadwal</h3>
-            <p>Atur jadwal shift karyawan</p>
+            <p>Atur jadwal shift karyawan bulanan</p>
         </a>
         
-        <a href="shifts.php" class="quick-link-card">
-            <div class="quick-link-icon">⏰</div>
-            <h3>Master Shift</h3>
-            <p>Kelola shift kerja</p>
+        <a href="shifts.php" class="menu-card">
+            <div class="icon">⏰</div>
+            <h3>Kelola Shift</h3>
+            <p>Pengaturan shift & jam kerja</p>
         </a>
         
-        <a href="holidays.php" class="quick-link-card">
-            <div class="quick-link-icon">🏖️</div>
+        <a href="holidays.php" class="menu-card">
+            <div class="icon">🏖️</div>
             <h3>Hari Libur</h3>
-            <p>Kelola libur nasional & cuti bersama</p>
+            <p>Libur nasional & cuti bersama</p>
         </a>
         
-        <a href="report.php" class="quick-link-card">
-            <div class="quick-link-icon">📊</div>
+        <a href="attendance.php" class="menu-card">
+            <div class="icon">📊</div>
             <h3>Laporan Absensi</h3>
-            <p>Lihat rekap absensi</p>
+            <p>Rekap kehadiran karyawan</p>
         </a>
-    </div>
-    
-    <!-- Shift List -->
-    <div class="card">
-        <div class="card-header">
-            <h2>Daftar Shift Kerja</h2>
-            <a href="shifts.php" class="btn btn-primary btn-sm">Kelola Shift</a>
-        </div>
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Kode</th>
-                        <th>Nama Shift</th>
-                        <th>Jam Kerja</th>
-                        <th>Hari Kerja</th>
-                        <th>Tipe</th>
-                        <th>Nilai MOD</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($shifts as $shift): ?>
-                    <tr>
-                        <td>
-                            <span class="shift-badge" style="background: <?php echo $shift['color_code']; ?>">
-                                <?php echo htmlspecialchars($shift['shift_code']); ?>
-                            </span>
-                        </td>
-                        <td><strong><?php echo htmlspecialchars($shift['shift_name']); ?></strong></td>
-                        <td><?php echo date('H:i', strtotime($shift['start_time'])); ?> - <?php echo date('H:i', strtotime($shift['end_time'])); ?></td>
-                        <td><?php echo ucwords(str_replace('-', ' ', $shift['work_days'])); ?></td>
-                        <td>
-                            <?php if($shift['is_mod']): ?>
-                                <span class="badge" style="background: #ef4444;">Piket MOD</span>
-                            <?php else: ?>
-                                <span class="badge badge-tetap">Regular</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <?php echo $shift['is_mod'] ? formatRupiah($shift['mod_value']) : '-'; ?>
-                        </td>
-                        <td>
-                            <?php if($shift['is_active']): ?>
-                                <span class="badge badge-tetap">Aktif</span>
-                            <?php else: ?>
-                                <span class="badge" style="background: #ccc;">Nonaktif</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+        
+        <a href="clock.php" class="menu-card">
+            <div class="icon">🕐</div>
+            <h3>Clock In/Out</h3>
+            <p>Absensi harian karyawan</p>
+        </a>
     </div>
 </div>
 
-<?php include '../../includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

@@ -4,23 +4,22 @@ require_once '../../config/database.php';
 
 checkRole(['super_admin', 'admin']);
 
-$page_title = 'Data Perusahaan';
+$page_title = 'Company Management';
 
 $database = new Database();
 $db = $database->getConnection();
 
-// Get company data
-$company = $db->query("SELECT * FROM companies LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+// Get company info (ambil company pertama atau yang aktif)
+$companyQuery = "SELECT * FROM companies WHERE is_active = 1 ORDER BY id ASC LIMIT 1";
+$stmt = $db->query($companyQuery);
+$company = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Get branches
-$branches = $db->query("SELECT * FROM branches ORDER BY branch_name")->fetchAll(PDO::FETCH_ASSOC);
-
-// Get departments
-$departments = $db->query("SELECT d.*, COUNT(e.id) as employee_count 
-                           FROM departments d 
-                           LEFT JOIN employees e ON d.id = e.department_id AND e.is_active = 1
-                           GROUP BY d.id 
-                           ORDER BY d.department_name")->fetchAll(PDO::FETCH_ASSOC);
+// Get statistics
+$stats = [
+    'total_branches' => $db->query("SELECT COUNT(*) FROM branches WHERE is_active = 1")->fetchColumn(),
+    'total_departments' => $db->query("SELECT COUNT(*) FROM departments WHERE is_active = 1")->fetchColumn(),
+    'total_positions' => $db->query("SELECT COUNT(*) FROM positions WHERE is_active = 1")->fetchColumn()
+];
 
 include '../../includes/header.php';
 include '../../includes/navbar.php';
@@ -28,150 +27,248 @@ include '../../includes/navbar.php';
 
 <div class="container">
     <div class="page-header">
-        <h1>Data Perusahaan</h1>
+        <h1>🏢 Company Management</h1>
+        <a href="../dashboard/index.php" class="btn btn-secondary">← Dashboard</a>
     </div>
     
-    <!-- Company Info -->
+    <!-- Company Info Card -->
+    <?php if ($company): ?>
     <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h2>Informasi Perusahaan</h2>
-            <?php if($company): ?>
-                <a href="edit_company.php" class="btn btn-primary btn-sm">Edit</a>
-            <?php endif; ?>
+            <a href="edit_company.php?id=<?php echo $company['id']; ?>" class="btn btn-primary">Edit</a>
         </div>
         <div class="card-body">
-            <?php if($company): ?>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Nama Perusahaan</label>
-                        <p><strong><?php echo htmlspecialchars($company['company_name']); ?></strong></p>
-                    </div>
-                    <div class="detail-item">
-                        <label>NPWP</label>
-                        <p><?php echo htmlspecialchars($company['npwp'] ?: '-'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Alamat</label>
-                        <p><?php echo htmlspecialchars($company['company_address'] ?: '-'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Telepon</label>
-                        <p><?php echo htmlspecialchars($company['company_phone'] ?: '-'); ?></p>
-                    </div>
-                    <div class="detail-item">
-                        <label>Email</label>
-                        <p><?php echo htmlspecialchars($company['company_email'] ?: '-'); ?></p>
-                    </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                <div>
+                    <h4 style="margin-bottom: 5px; color: #666;">NAMA PERUSAHAAN</h4>
+                    <p style="font-size: 18px; font-weight: bold; margin: 0;">
+                        <?php echo htmlspecialchars($company['company_name'] ?? '-'); ?>
+                    </p>
                 </div>
-            <?php else: ?>
-                <p class="text-muted">Belum ada data perusahaan</p>
-                <a href="edit_company.php" class="btn btn-primary">Tambah Data Perusahaan</a>
+                
+                <div>
+                    <h4 style="margin-bottom: 5px; color: #666;">NPWP</h4>
+                    <p style="font-size: 16px; margin: 0;">
+                        <?php echo htmlspecialchars($company['tax_id'] ?? '-'); ?>
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: 5px; color: #666;">ALAMAT</h4>
+                    <p style="font-size: 16px; margin: 0;">
+                        <?php echo nl2br(htmlspecialchars($company['address'] ?? '-')); ?>
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: 5px; color: #666;">TELEPON</h4>
+                    <p style="font-size: 16px; margin: 0;">
+                        <?php echo htmlspecialchars($company['phone'] ?? '-'); ?>
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: 5px; color: #666;">EMAIL</h4>
+                    <p style="font-size: 16px; margin: 0;">
+                        <?php echo htmlspecialchars($company['email'] ?? '-'); ?>
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: 5px; color: #666;">WEBSITE</h4>
+                    <p style="font-size: 16px; margin: 0;">
+                        <?php 
+                        $website = $company['website'] ?? '';
+                        if ($website): 
+                        ?>
+                            <a href="<?php echo htmlspecialchars($website); ?>" target="_blank">
+                                <?php echo htmlspecialchars($website); ?>
+                            </a>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </p>
+                </div>
+            </div>
+            
+            <?php if (!empty($company['logo'])): ?>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <h4 style="margin-bottom: 10px; color: #666;">LOGO PERUSAHAAN</h4>
+                    <?php 
+                    $logoPath = '../../uploads/companies/' . $company['logo'];
+                    if (file_exists($logoPath)): 
+                    ?>
+                        <img src="<?php echo BASE_URL; ?>uploads/companies/<?php echo htmlspecialchars($company['logo']); ?>" 
+                             alt="Company Logo" 
+                             style="max-height: 100px; border: 1px solid #ddd; padding: 10px;">
+                    <?php else: ?>
+                        <p style="color: #999;">Logo tidak ditemukan</p>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>
-    
-    <!-- Branches -->
+    <?php else: ?>
     <div class="card">
-        <div class="card-header">
-            <h2>Cabang Perusahaan</h2>
-            <a href="add_branch.php" class="btn btn-primary btn-sm">+ Tambah Cabang</a>
+        <div class="card-body" style="text-align: center; padding: 40px;">
+            <h3>Belum ada data perusahaan</h3>
+            <p style="color: #666; margin-bottom: 20px;">Tambahkan data perusahaan terlebih dahulu</p>
+            <a href="add_company.php" class="btn btn-primary">+ Tambah Perusahaan</a>
         </div>
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nama Cabang</th>
-                        <th>Alamat</th>
-                        <th>Telepon</th>
-                        <th>Koordinat</th>
-                        <th>Radius</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if(count($branches) > 0): ?>
-                        <?php foreach($branches as $branch): ?>
-                        <tr>
-                            <td><strong><?php echo htmlspecialchars($branch['branch_name']); ?></strong></td>
-                            <td><?php echo htmlspecialchars($branch['branch_address']); ?></td>
-                            <td><?php echo htmlspecialchars($branch['branch_phone'] ?: '-'); ?></td>
-                            <td>
-                                <small><?php echo $branch['latitude']; ?>, <?php echo $branch['longitude']; ?></small>
-                            </td>
-                            <td><?php echo $branch['radius_meter']; ?>m</td>
-                            <td>
-                                <?php if($branch['is_active']): ?>
-                                    <span class="badge badge-tetap">Aktif</span>
-                                <?php else: ?>
-                                    <span class="badge" style="background: #ccc;">Nonaktif</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="edit_branch.php?id=<?php echo $branch['id']; ?>" class="btn-action btn-edit">Edit</a>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="7" style="text-align: center;">Belum ada data cabang</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #3b82f6;">🏪</div>
+            <div class="stat-info">
+                <h3><?php echo $stats['total_branches']; ?></h3>
+                <p>Cabang Aktif</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #10b981;">🏛️</div>
+            <div class="stat-info">
+                <h3><?php echo $stats['total_departments']; ?></h3>
+                <p>Departemen</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #f59e0b;">👔</div>
+            <div class="stat-info">
+                <h3><?php echo $stats['total_positions']; ?></h3>
+                <p>Jabatan</p>
+            </div>
         </div>
     </div>
     
-    <!-- Departments -->
+    <!-- Quick Links -->
     <div class="card">
         <div class="card-header">
-            <h2>Departemen</h2>
-            <a href="add_department.php" class="btn btn-primary btn-sm">+ Tambah Departemen</a>
+            <h2>Menu Perusahaan</h2>
         </div>
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nama Departemen</th>
-                        <th>Deskripsi</th>
-                        <th>Jumlah Karyawan</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if(count($departments) > 0): ?>
-                        <?php foreach($departments as $dept): ?>
-                        <tr>
-                            <td><strong><?php echo htmlspecialchars($dept['department_name']); ?></strong></td>
-                            <td><?php echo htmlspecialchars($dept['description'] ?: '-'); ?></td>
-                            <td><?php echo $dept['employee_count']; ?> orang</td>
-                            <td>
-                                <?php if($dept['is_active']): ?>
-                                    <span class="badge badge-tetap">Aktif</span>
-                                <?php else: ?>
-                                    <span class="badge" style="background: #ccc;">Nonaktif</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="edit_department.php?id=<?php echo $dept['id']; ?>" class="btn-action btn-edit">Edit</a>
-                                    <a href="manage_positions.php?dept_id=<?php echo $dept['id']; ?>" class="btn-action btn-view">Jabatan</a>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="5" style="text-align: center;">Belum ada data departemen</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <div class="quick-links">
+            <a href="companies.php" class="quick-link-card">
+                <div class="quick-link-icon">🏢</div>
+                <h3>Perusahaan</h3>
+                <p>Kelola data perusahaan</p>
+            </a>
+            
+            <a href="branches.php" class="quick-link-card">
+                <div class="quick-link-icon">🏪</div>
+                <h3>Cabang</h3>
+                <p>Kelola cabang/lokasi</p>
+            </a>
+            
+            <a href="departments.php" class="quick-link-card">
+                <div class="quick-link-icon">🏛️</div>
+                <h3>Departemen</h3>
+                <p>Kelola departemen</p>
+            </a>
+            
+            <a href="manage_positions.php" class="quick-link-card">
+                <div class="quick-link-icon">👔</div>
+                <h3>Jabatan</h3>
+                <p>Kelola jabatan</p>
+            </a>
         </div>
     </div>
 </div>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 32px;
+    color: #1f2937;
+}
+
+.stat-info p {
+    margin: 5px 0 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.quick-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.quick-link-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px 20px;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.quick-link-card:hover {
+    transform: translateY(-5px);
+}
+
+.quick-link-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.quick-link-card h3 {
+    margin: 10px 0;
+    font-size: 20px;
+    color: white;
+}
+
+.quick-link-card p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.quick-link-card:nth-child(2) {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.quick-link-card:nth-child(3) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.quick-link-card:nth-child(4) {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+</style>
 
 <?php include '../../includes/footer.php'; ?>

@@ -62,13 +62,16 @@ include '../../includes/navbar.php';
 ?>
 
 <div class="container">
-    <div class="page-header">
-        <h1>Laporan Absensi</h1>
-        <div>
-            <button class="btn btn-success" onclick="exportToExcel()">📊 Export Excel</button>
-            <a href="index.php" class="btn btn-secondary">← Kembali</a>
-        </div>
+<div class="page-header">
+    <h1>Laporan Absensi</h1>
+    <div>
+        <a href="export_excel.php?month=<?php echo $month; ?>&year=<?php echo $year; ?>&department=<?php echo $department_id; ?>" 
+           class="btn btn-success">
+            📊 Export Excel
+        </a>
+        <a href="index.php" class="btn btn-secondary">← Kembali</a>
     </div>
+</div>
     
     <!-- Filters -->
     <div class="card">

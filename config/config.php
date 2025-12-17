@@ -1,70 +1,52 @@
 <?php
-// ERROR REPORTING - HAPUS DI PRODUCTION!
+// Error Reporting (Development only - HAPUS di production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
-// ... sisa code
 
+// Database Configuration
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'hrisku_db');
+define('DB_USER', 'root');
+define('DB_PASS', '');
 
-// Base Configuration
+// Application Configuration
+define('APP_NAME', 'HRISKU App');
 define('BASE_URL', 'http://localhost/hrisku-app/');
-define('UPLOAD_PATH', __DIR__ . '/../uploads/');
-define('APP_NAME', 'HRISKU APP');
 
-// Timezone
-date_default_timezone_set('Asia/Jakarta');
+// Include helper functions
+require_once __DIR__ . '/functions.php';
 
-// Authentication Functions
+// Authentication functions
 function isLoggedIn() {
-    return isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0;
-}
-
-function checkRole($allowed_roles = []) {
-    if (!isLoggedIn()) {
-        header('Location: ' . BASE_URL . 'modules/auth/login.php');
-        exit();
-    }
-    
-    if (!empty($allowed_roles) && !in_array($_SESSION['role'], $allowed_roles)) {
-        die('<h1>Access Denied</h1><p>You do not have permission to access this page.</p>');
-    }
-}
-
-function getUserRole() {
-    return $_SESSION['role'] ?? 'guest';
+    return isset($_SESSION['user_id']);
 }
 
 function getUserId() {
-    return $_SESSION['user_id'] ?? 0;
+    return $_SESSION['user_id'] ?? null;
+}
+
+function getUsername() {
+    return $_SESSION['username'] ?? '';
+}
+
+function getUserRole() {
+    return $_SESSION['role'] ?? '';
 }
 
 function getEmployeeId() {
     return $_SESSION['employee_id'] ?? null;
 }
 
-function getUsername() {
-    return $_SESSION['username'] ?? 'Guest';
-}
-
-// Helper Functions
-function formatRupiah($angka) {
-    return 'Rp ' . number_format($angka, 0, ',', '.');
-}
-
-function formatDate($date, $format = 'd M Y') {
-    return date($format, strtotime($date));
-}
-
-function sanitize($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
-}
-
-function redirect($url) {
-    header('Location: ' . $url);
-    exit();
-}
-
-function showAlert($message, $type = 'success') {
-    return "<div class='alert alert-{$type}'>{$message}</div>";
+function checkRole($allowedRoles = []) {
+    if (!isLoggedIn()) {
+        header('Location: ' . BASE_URL . 'modules/auth/login.php');
+        exit();
+    }
+    
+    if (!empty($allowedRoles) && !in_array(getUserRole(), $allowedRoles)) {
+        header('Location: ' . BASE_URL . 'modules/dashboard/index.php');
+        exit();
+    }
 }
